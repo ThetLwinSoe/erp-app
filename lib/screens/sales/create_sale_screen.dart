@@ -777,7 +777,7 @@ class _ProductSelectorState extends State<_ProductSelector> {
                               color: AppTheme.primaryColor,
                             ),
                           ),
-                          title: Text(product.name),
+                          title: Text('${product.name} | ${product.sku}'),
                           subtitle: Text(
                             '${product.sellingPrice.toStringAsFixed(2)} • Stock: ${product.stockQuantity}',
                           ),

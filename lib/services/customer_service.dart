@@ -15,6 +15,7 @@ class CustomerService {
       final queryParams = <String, dynamic>{
         'page': page,
         'limit': limit,
+        'status': 'active',
       };
 
       if (search != null && search.isNotEmpty) {
