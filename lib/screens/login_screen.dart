@@ -57,21 +57,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     width: 100,
                     height: 100,
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.point_of_sale,
-                      size: 60,
-                      color: Colors.white,
+                    // child: const Icon(
+                    //   Icons.point_of_sale,
+                    //   size: 60,
+                    //   color: Colors.white,
+                    // ),
+                    child: Image.asset(
+                      'assets/images/icon/logo-horizontal-dark@2x-center.png',
+                      height: 60,
                     ),
                   ),
                   const SizedBox(height: 24),
 
                   // Title
                   const Text(
-                    'ERP Sales App',
+                    'Mobile Sales App',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 28,
