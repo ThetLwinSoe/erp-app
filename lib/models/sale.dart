@@ -91,6 +91,7 @@ class SaleItem {
   final int saleId;
   final int productId;
   final int quantity;
+  final int focQuantity;
   final double unitPrice;
   final double discountPercent;
   final double discountAmount;
@@ -102,6 +103,7 @@ class SaleItem {
     required this.saleId,
     required this.productId,
     required this.quantity,
+    this.focQuantity = 0,
     required this.unitPrice,
     this.discountPercent = 0,
     this.discountAmount = 0,
@@ -115,6 +117,7 @@ class SaleItem {
       saleId: json['saleId'] ?? 0,
       productId: json['productId'] ?? 0,
       quantity: json['quantity'] ?? 0,
+      focQuantity: json['focQuantity'] ?? 0,
       unitPrice: _parseDouble(json['unitPrice']),
       discountPercent: _parseDouble(json['discountPercent']),
       discountAmount: _parseDouble(json['discountAmount']),
@@ -137,6 +140,7 @@ class SaleItem {
     return {
       'productId': productId,
       'quantity': quantity,
+      'focQuantity': focQuantity,
       'unitPrice': unitPrice,
       'discountPercent': discountPercent,
     };
@@ -172,12 +176,14 @@ class CreateSaleRequest {
 class CreateSaleItemRequest {
   final int productId;
   final int quantity;
+  final int focQuantity;
   final double unitPrice;
   final double discountPercent;
 
   CreateSaleItemRequest({
     required this.productId,
     required this.quantity,
+    this.focQuantity = 0,
     required this.unitPrice,
     this.discountPercent = 0,
   });
@@ -186,6 +192,7 @@ class CreateSaleItemRequest {
     return {
       'productId': productId,
       'quantity': quantity,
+      'focQuantity': focQuantity,
       'unitPrice': unitPrice,
       'discountPercent': discountPercent,
     };

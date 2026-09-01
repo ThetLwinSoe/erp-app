@@ -383,6 +383,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                 ),
                 Text(
                   '${item.quantity} x ${item.unitPrice.toStringAsFixed(2)}'
+                  '${item.focQuantity > 0 ? '  +${item.focQuantity} FOC' : ''}'
                   '${item.discountPercent > 0 ? '  (-${item.discountPercent.toStringAsFixed(1)}%)' : ''}',
                   style: const TextStyle(
                     color: AppTheme.textSecondary,

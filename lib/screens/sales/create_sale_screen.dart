@@ -84,6 +84,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
 
   void _showQuantityDialog(Product product) {
     final quantityController = TextEditingController(text: '1');
+    final focQuantityController = TextEditingController(text: '0');
     final discountController = TextEditingController(text: '0');
 
     showDialog(
@@ -118,6 +119,15 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
             ),
             const SizedBox(height: 12),
             TextField(
+              controller: focQuantityController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'FOC Qty (free of charge)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
               controller: discountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(
@@ -136,23 +146,30 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
           ElevatedButton(
             onPressed: () {
               final quantity = int.tryParse(quantityController.text) ?? 0;
+              final focQuantity = int.tryParse(focQuantityController.text) ?? 0;
               final discount = double.tryParse(discountController.text) ?? 0;
-              if (quantity > 0) {
+              if (quantity + focQuantity > 0) {
                 setState(() {
                   final existingIndex = _cartItems.indexWhere((item) => item.product.id == product.id);
                   if (existingIndex != -1) {
                     _cartItems[existingIndex].quantity += quantity;
+                    _cartItems[existingIndex].focQuantity += focQuantity;
                     _cartItems[existingIndex].discountPercent = discount;
                   } else {
                     _cartItems.add(_CartItem(
                       product: product,
                       quantity: quantity,
+                      focQuantity: focQuantity,
                       unitPrice: product.sellingPrice,
                       discountPercent: discount,
                     ));
                   }
                 });
                 Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Enter a quantity or FOC quantity of at least 1')),
+                );
               }
             },
             child: const Text('Add'),
@@ -206,6 +223,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
           .map((item) => CreateSaleItemRequest(
                 productId: item.product.id,
                 quantity: item.quantity,
+                focQuantity: item.focQuantity,
                 unitPrice: item.unitPrice,
                 discountPercent: item.discountPercent,
               ))
@@ -412,6 +430,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                           ),
                           Text(
                             '${item.unitPrice.toStringAsFixed(2)} x ${item.quantity}'
+                            '${item.focQuantity > 0 ? '  +${item.focQuantity} FOC' : ''}'
                             '${item.discountPercent > 0 ? '  (-${item.discountPercent.toStringAsFixed(1)}%)' : ''}',
                             style: const TextStyle(
                               color: AppTheme.textSecondary,
@@ -563,16 +582,19 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
 class _CartItem {
   final Product product;
   int quantity;
+  int focQuantity;
   final double unitPrice;
   double discountPercent;
 
   _CartItem({
     required this.product,
     required this.quantity,
+    this.focQuantity = 0,
     required this.unitPrice,
     this.discountPercent = 0,
   });
 
+  // FOC quantity is free - it never enters pricing, only stock movement.
   double get subtotal => quantity * unitPrice;
   double get discountAmount => subtotal * (discountPercent / 100);
   double get total => subtotal - discountAmount;
