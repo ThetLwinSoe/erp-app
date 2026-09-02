@@ -19,11 +19,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const DashboardScreen(),
-    const SalesListScreen(),
-    const CustomerListScreen(),
-    const ProductListScreen(),
+  void _goToSalesTab() {
+    setState(() {
+      _currentIndex = 1;
+    });
+  }
+
+  List<Widget> _buildScreens() => [
+    DashboardScreen(onViewSales: _goToSalesTab),
+    SalesListScreen(isActive: _currentIndex == 1),
+    CustomerListScreen(isActive: _currentIndex == 2),
+    ProductListScreen(isActive: _currentIndex == 3),
   ];
 
   final List<BottomNavigationBarItem> _navItems = const [
@@ -149,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: _buildScreens(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

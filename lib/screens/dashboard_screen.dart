@@ -8,7 +8,9 @@ import '../config/constants.dart';
 import 'sales/create_sale_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final VoidCallback onViewSales;
+
+  const DashboardScreen({super.key, required this.onViewSales});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -151,9 +153,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.list_alt,
                 label: 'View Sales',
                 color: AppTheme.primaryColor,
-                onTap: () {
-                  // Switch to sales tab - handled by parent
-                },
+                onTap: widget.onViewSales,
               ),
             ),
           ],

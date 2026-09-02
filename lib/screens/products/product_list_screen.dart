@@ -6,7 +6,9 @@ import '../../models/product.dart';
 import 'product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
-  const ProductListScreen({super.key});
+  final bool isActive;
+
+  const ProductListScreen({super.key, required this.isActive});
 
   @override
   State<ProductListScreen> createState() => _ProductListScreenState();
@@ -20,10 +22,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductProvider>().fetchProducts(refresh: true);
+      _loadProducts();
     });
 
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _loadProducts();
+    }
   }
 
   @override
@@ -31,6 +41,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _loadProducts() {
+    context.read<ProductProvider>().fetchProducts(refresh: true);
   }
 
   void _onScroll() {

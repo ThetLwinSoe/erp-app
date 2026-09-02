@@ -9,7 +9,9 @@ import 'sale_detail_screen.dart';
 import 'create_sale_screen.dart';
 
 class SalesListScreen extends StatefulWidget {
-  const SalesListScreen({super.key});
+  final bool isActive;
+
+  const SalesListScreen({super.key, required this.isActive});
 
   @override
   State<SalesListScreen> createState() => _SalesListScreenState();
@@ -30,6 +32,14 @@ class _SalesListScreenState extends State<SalesListScreen> {
     });
 
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant SalesListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _loadSales();
+    }
   }
 
   @override

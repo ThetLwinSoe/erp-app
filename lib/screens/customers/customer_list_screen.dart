@@ -6,7 +6,9 @@ import '../../models/customer.dart';
 import 'customer_detail_screen.dart';
 
 class CustomerListScreen extends StatefulWidget {
-  const CustomerListScreen({super.key});
+  final bool isActive;
+
+  const CustomerListScreen({super.key, required this.isActive});
 
   @override
   State<CustomerListScreen> createState() => _CustomerListScreenState();
@@ -20,10 +22,18 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CustomerProvider>().fetchCustomers(refresh: true);
+      _loadCustomers();
     });
 
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomerListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _loadCustomers();
+    }
   }
 
   @override
@@ -31,6 +41,10 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _loadCustomers() {
+    context.read<CustomerProvider>().fetchCustomers(refresh: true);
   }
 
   void _onScroll() {
