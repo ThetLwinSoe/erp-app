@@ -168,13 +168,10 @@ class SalesService {
     }
   }
 
-  String _getErrorMessage(DioException e) {
-    if (e.response?.data != null && e.response?.data is Map) {
-      final data = e.response?.data as Map;
-      if (data.containsKey('message')) {
-        return data['message'];
-      }
-    }
-    return 'An error occurred. Please try again.';
-  }
+  String _getErrorMessage(DioException e) => mapDioErrorMessage(e, statusMessages: const {
+        401: 'Session expired. Please log in again.',
+        403: 'Access denied',
+        404: 'Sale not found',
+        500: 'Server error. Please try again later.',
+      });
 }

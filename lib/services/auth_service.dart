@@ -83,37 +83,10 @@ class AuthService {
     await _storage.delete(key: AppConstants.userKey);
   }
 
-  String _getErrorMessage(DioException e) {
-    if (e.response?.data != null && e.response?.data is Map) {
-      final data = e.response?.data as Map;
-      if (data.containsKey('message')) {
-        return data['message'];
-      }
-      if (data.containsKey('error')) {
-        return data['error'];
-      }
-    }
-
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        return 'Connection timeout. Please check your internet connection.';
-      case DioExceptionType.connectionError:
-        return 'Unable to connect to server. Please check your network.';
-      case DioExceptionType.badResponse:
-        if (e.response?.statusCode == 401) {
-          return 'Invalid email or password';
-        } else if (e.response?.statusCode == 403) {
-          return 'Access denied';
-        } else if (e.response?.statusCode == 404) {
-          return 'Resource not found';
-        } else if (e.response?.statusCode == 500) {
-          return 'Server error. Please try again later.';
-        }
-        return 'Request failed';
-      default:
-        return 'An error occurred. Please try again.';
-    }
-  }
+  String _getErrorMessage(DioException e) => mapDioErrorMessage(e, statusMessages: const {
+        401: 'Invalid email or password',
+        403: 'Access denied',
+        404: 'Resource not found',
+        500: 'Server error. Please try again later.',
+      });
 }
