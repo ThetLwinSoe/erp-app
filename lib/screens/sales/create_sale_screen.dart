@@ -196,6 +196,8 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
   }
 
   Future<void> _submitSale() async {
+    if (_isSubmitting) return;
+
     if (_selectedCustomer == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a customer')),
