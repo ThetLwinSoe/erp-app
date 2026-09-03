@@ -44,7 +44,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   void _loadProducts() {
-    context.read<ProductProvider>().fetchProducts(refresh: true);
+    context.read<ProductProvider>().fetchProducts(
+          search: _searchController.text.isEmpty ? null : _searchController.text,
+          refresh: true,
+        );
   }
 
   void _onScroll() {

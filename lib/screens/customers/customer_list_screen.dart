@@ -44,7 +44,10 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
   }
 
   void _loadCustomers() {
-    context.read<CustomerProvider>().fetchCustomers(refresh: true);
+    context.read<CustomerProvider>().fetchCustomers(
+          search: _searchController.text.isEmpty ? null : _searchController.text,
+          refresh: true,
+        );
   }
 
   void _onScroll() {

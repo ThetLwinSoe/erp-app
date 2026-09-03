@@ -9,8 +9,9 @@ import 'sales/create_sale_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final VoidCallback onViewSales;
+  final bool isActive;
 
-  const DashboardScreen({super.key, required this.onViewSales});
+  const DashboardScreen({super.key, required this.onViewSales, required this.isActive});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -23,6 +24,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SalesProvider>().fetchSales(refresh: true);
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant DashboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      context.read<SalesProvider>().fetchSales(refresh: true);
+    }
   }
 
   @override

@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget> _buildScreens() => [
-    DashboardScreen(onViewSales: _goToSalesTab),
+    DashboardScreen(onViewSales: _goToSalesTab, isActive: _currentIndex == 0),
     SalesListScreen(isActive: _currentIndex == 1),
     CustomerListScreen(isActive: _currentIndex == 2),
     ProductListScreen(isActive: _currentIndex == 3),
