@@ -1,7 +1,7 @@
 class AppConstants {
   // API Configuration - Update this to your ERP system URL
-  // static const String baseUrl = 'https://coreflow-erp-api-g8by.onrender.com/api'; // Web / iOS simulator
-  static const String baseUrl = 'http://localhost:3000/api'; // Web / iOS simulator
+  static const String baseUrl = 'https://coreflow-erp-api-g8by.onrender.com/api'; // Web / iOS simulator
+  // static const String baseUrl = 'http://localhost:3000/api'; // Web / iOS simulator
   // static const String baseUrl = 'http://10.0.2.2:3000/api'; // Android emulator
   // static const String baseUrl = 'http://YOUR_SERVER_IP:3000/api'; // Physical device
 
