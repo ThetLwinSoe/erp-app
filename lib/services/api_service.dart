@@ -71,6 +71,36 @@ class ApiService {
   }
 }
 
+/// Maps a [DioException] to a user-facing message. [statusMessages] lets each
+/// service curate wording for specific HTTP status codes (e.g. a 401 means
+/// something different on login vs. an expired session on other endpoints);
+/// codes without a curated message fall back to the backend's own message.
+String mapDioErrorMessage(DioException e, {Map<int, String> statusMessages = const {}}) {
+  switch (e.type) {
+    case DioExceptionType.connectionTimeout:
+    case DioExceptionType.sendTimeout:
+    case DioExceptionType.receiveTimeout:
+      return 'Connection timeout. Please check your internet connection.';
+    case DioExceptionType.connectionError:
+      return 'Unable to connect to server. Please check your network.';
+    case DioExceptionType.badResponse:
+      final curated = statusMessages[e.response?.statusCode];
+      if (curated != null) return curated;
+      return _extractBackendMessage(e) ?? 'Request failed';
+    default:
+      return _extractBackendMessage(e) ?? 'An error occurred. Please try again.';
+  }
+}
+
+String? _extractBackendMessage(DioException e) {
+  final data = e.response?.data;
+  if (data is Map) {
+    if (data['message'] is String) return data['message'] as String;
+    if (data['error'] is String) return data['error'] as String;
+  }
+  return null;
+}
+
 class ApiResponse<T> {
   final bool success;
   final T? data;
