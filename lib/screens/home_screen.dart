@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../config/theme.dart';
+import '../config/constants.dart';
+import '../services/version_service.dart';
+import '../utils/version_utils.dart';
 import 'dashboard_screen.dart';
 import 'sales/sales_list_screen.dart';
 import 'customers/customer_list_screen.dart';
@@ -18,6 +21,32 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkForUpdate());
+  }
+
+  Future<void> _checkForUpdate() async {
+    final latest = await VersionService().getLatestMobileVersion();
+    if (!mounted) return;
+    if (isNewerVersion(latest, AppConstants.appVersion)) {
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          content: const Text('A new version of the app is available.'),
+          leading: const Icon(Icons.system_update, color: AppTheme.primaryColor),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+              child: const Text('Dismiss'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   void _goToSalesTab() {
     setState(() {
@@ -131,6 +160,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       user?.email ?? '',
                       style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    const Text(
+                      'App version: ${AppConstants.appVersion}',
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.textSecondary,
                       ),
