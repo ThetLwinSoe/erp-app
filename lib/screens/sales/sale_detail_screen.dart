@@ -25,7 +25,6 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
   }
 
   void _showStatusUpdateDialog(Sale sale) {
-    final currentIndex = AppConstants.saleStatuses.indexOf(sale.status);
     final availableStatuses = <String>[];
 
     // Determine available status transitions
