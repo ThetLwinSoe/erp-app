@@ -45,7 +45,11 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      // Named dialogContext so it can't shadow the State's own `context` -
+      // it's popped (and thus invalid to use) before the awaits below, so
+      // the post-await ScaffoldMessenger calls must use the State's
+      // context, which the `mounted` checks below actually guard.
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Update Status'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -62,7 +66,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
               ),
               title: Text(status[0].toUpperCase() + status.substring(1)),
               onTap: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 final provider = context.read<SalesProvider>();
                 final success = await provider.updateSaleStatus(widget.saleId, status);
                 if (success && mounted) {
@@ -80,7 +84,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
         ],
@@ -91,17 +95,22 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
   void _showDeleteConfirmation(Sale sale) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      // Named dialogContext so it can't shadow the State's own `context` -
+      // it's popped (and thus invalid to use) before the await below, so
+      // the post-delete pop/snackbar must use the State's context (popping
+      // this screen itself, not the already-closed dialog), which the
+      // `mounted` checks below actually guard.
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Sale'),
         content: Text('Are you sure you want to delete order ${sale.orderNumber}?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               final provider = context.read<SalesProvider>();
               final success = await provider.deleteSale(widget.saleId);
               if (success && mounted) {

@@ -87,17 +87,21 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      // Named dialogContext so it can't shadow the State's own `context` -
+      // it's popped (and thus invalid to navigate with) before the await
+      // below, so the post-logout navigation must use the State's context,
+      // which the `mounted` check below actually guards.
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await context.read<AuthProvider>().logout();
               if (mounted) {
                 Navigator.of(context).pushReplacement(

@@ -167,9 +167,12 @@ class _SalesListScreenState extends State<SalesListScreen> {
             context,
             MaterialPageRoute(builder: (_) => const CreateSaleScreen()),
           );
-          if (result == true) {
-            context.read<SalesProvider>().refreshSales();
-          }
+          if (!mounted || result != true) return;
+          // this.context, not the bare `context` parameter of build() that
+          // this closure captures - the analyzer only ties `mounted` to the
+          // State's own context getter, not build()'s same-named parameter,
+          // even though they're the same object at runtime.
+          this.context.read<SalesProvider>().refreshSales();
         },
         child: const Icon(Icons.add),
       ),
@@ -252,7 +255,7 @@ class _SalesListScreenState extends State<SalesListScreen> {
             context,
             MaterialPageRoute(builder: (_) => SaleDetailScreen(saleId: sale.id)),
           );
-          if (result == true) {
+          if (result == true && mounted) {
             context.read<SalesProvider>().refreshSales();
           }
         },

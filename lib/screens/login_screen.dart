@@ -54,14 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo/Icon
-                  Container(
+                  SizedBox(
                     width: 100,
                     height: 100,
-                    // child: const Icon(
-                    //   Icons.point_of_sale,
-                    //   size: 60,
-                    //   color: Colors.white,
-                    // ),
                     child: Image.asset(
                       'assets/images/icon/logo-horizontal-dark@2x-center.png',
                       height: 60,
