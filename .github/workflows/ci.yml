@@ -14,10 +14,14 @@ jobs:
       - uses: actions/checkout@v4
 
       # pubspec.yaml only pins the Dart SDK (environment.sdk), not a Flutter
-      # version, so flutter-version-file can't resolve one from it. .metadata
-      # tracks the stable channel, so install latest stable directly instead.
+      # version, so flutter-version-file can't resolve one from it, and plain
+      # channel:stable floats to whatever is newest on the day the job runs -
+      # which can introduce analyzer findings a locally-tested older SDK
+      # never saw. Pin the exact version developers are actually running
+      # locally instead, and bump this deliberately when upgrading Flutter.
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.38.9'
           channel: stable
 
       - name: Install dependencies
