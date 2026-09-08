@@ -96,13 +96,13 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 }
 
                 if (provider.customers.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.people_outline, size: 64, color: AppTheme.textSecondary),
-                        const SizedBox(height: 16),
-                        const Text(
+                        Icon(Icons.people_outline, size: 64, color: AppTheme.textSecondary),
+                        SizedBox(height: 16),
+                        Text(
                           'No customers found',
                           style: TextStyle(
                             fontSize: 18,
