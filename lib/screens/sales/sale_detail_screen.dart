@@ -5,6 +5,7 @@ import '../../providers/sales_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
 import '../../models/sale.dart';
+import '../../utils/formatters.dart';
 
 class SaleDetailScreen extends StatefulWidget {
   final int saleId;
@@ -393,7 +394,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  '${item.quantity} x ${item.unitPrice.toStringAsFixed(2)}'
+                  '${item.quantity} x ${formatAmount(item.unitPrice)}'
                   '${item.focQuantity > 0 ? '  +${item.focQuantity} FOC' : ''}'
                   '${item.discountPercent > 0 ? '  (-${item.discountPercent.toStringAsFixed(1)}%)' : ''}',
                   style: const TextStyle(
@@ -405,7 +406,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
             ),
           ),
           Text(
-            '${item.total.toStringAsFixed(2)}',
+            formatAmount(item.total),
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ],
@@ -429,21 +430,21 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
       ),
       child: Column(
         children: [
-          _buildSummaryRow('Subtotal', '${sale.subtotal.toStringAsFixed(2)}'),
+          _buildSummaryRow('Subtotal', formatAmount(sale.subtotal)),
           if (sale.discountPercent > 0) ...[
             const SizedBox(height: 8),
             _buildSummaryRow(
               'Discount (${sale.discountPercent.toStringAsFixed(1)}%)',
-              '-${sale.discountAmount.toStringAsFixed(2)}',
+              '-${formatAmount(sale.discountAmount)}',
               isDiscount: true,
             ),
           ],
           const SizedBox(height: 8),
-          _buildSummaryRow('Tax', '${sale.tax.toStringAsFixed(2)}'),
+          _buildSummaryRow('Tax', formatAmount(sale.tax)),
           const Divider(height: 24),
           _buildSummaryRow(
             'Total',
-            '${sale.total.toStringAsFixed(2)}',
+            formatAmount(sale.total),
             isTotal: true,
           ),
         ],
