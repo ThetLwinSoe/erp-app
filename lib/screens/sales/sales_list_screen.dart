@@ -5,6 +5,7 @@ import '../../providers/sales_provider.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
 import '../../models/sale.dart';
+import '../../utils/formatters.dart';
 import 'sale_detail_screen.dart';
 import 'create_sale_screen.dart';
 
@@ -320,7 +321,7 @@ class _SalesListScreenState extends State<SalesListScreen> {
                   ),
                   const Spacer(),
                   Text(
-                    '${sale.total.toStringAsFixed(2)}',
+                    formatAmount(sale.total),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

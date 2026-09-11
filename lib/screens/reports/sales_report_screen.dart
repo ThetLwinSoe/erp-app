@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../config/theme.dart';
 import '../../services/sales_service.dart';
+import '../../utils/formatters.dart';
 
 class SalesReportScreen extends StatefulWidget {
   const SalesReportScreen({super.key});
@@ -217,7 +218,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
             Expanded(
               child: _buildSummaryCard(
                 'Revenue',
-                '${totalRevenue.toStringAsFixed(2)}',
+                formatAmount(totalRevenue),
                 Icons.attach_money,
                 AppTheme.successColor,
               ),
@@ -227,7 +228,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
         const SizedBox(height: 12),
         _buildSummaryCard(
           'Average Order Value',
-          '${averageOrderValue.toStringAsFixed(2)}',
+          formatAmount(averageOrderValue),
           Icons.analytics,
           AppTheme.accentColor,
           fullWidth: true,
@@ -455,7 +456,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
                       ),
                     ),
                     Text(
-                      '${(product['total'] ?? 0).toStringAsFixed(2)}',
+                      formatAmount(product['total'] ?? 0),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,

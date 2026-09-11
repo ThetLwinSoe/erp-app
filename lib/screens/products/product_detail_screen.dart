@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
 import '../../config/theme.dart';
 import '../../models/product.dart';
+import '../../utils/formatters.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -151,7 +152,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                     Text(
-                      '${product.sellingPrice.toStringAsFixed(2)}',
+                      formatAmount(product.sellingPrice),
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -173,7 +174,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                     Text(
-                      '${product.costPrice.toStringAsFixed(2)}',
+                      formatAmount(product.costPrice),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
