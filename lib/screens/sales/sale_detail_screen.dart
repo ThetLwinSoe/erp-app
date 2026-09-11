@@ -301,7 +301,10 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
           ),
           const Divider(),
           if (customer != null) ...[
-            _buildInfoRow(Icons.person_outline, customer.name),
+            _buildInfoRow(
+              Icons.person_outline,
+              customer.code != null ? '${customer.name} (${customer.code})' : customer.name,
+            ),
             if (customer.email != null)
               _buildInfoRow(Icons.email_outlined, customer.email!),
             if (customer.phone != null)

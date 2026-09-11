@@ -222,6 +222,14 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                         fontSize: 16,
                       ),
                     ),
+                    if (customer.code != null)
+                      Text(
+                        customer.code!,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                     const SizedBox(height: 4),
                     if (customer.email != null)
                       Row(

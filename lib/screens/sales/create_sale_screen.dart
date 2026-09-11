@@ -368,7 +368,9 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _selectedCustomer!.name,
+                          _selectedCustomer!.code != null
+                              ? '${_selectedCustomer!.code} - ${_selectedCustomer!.name}'
+                              : _selectedCustomer!.name,
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         if (_selectedCustomer!.phone != null)
@@ -692,7 +694,7 @@ class _CustomerSelectorState extends State<_CustomerSelector> {
                               ),
                             ),
                           ),
-                          title: Text(customer.name),
+                          title: Text(customer.code != null ? '${customer.code} - ${customer.name}' : customer.name),
                           subtitle: Text(customer.phone ?? customer.email ?? ''),
                           onTap: () => widget.onSelect(customer),
                         );

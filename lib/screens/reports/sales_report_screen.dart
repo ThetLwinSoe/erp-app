@@ -16,7 +16,7 @@ class _SalesReportScreenState extends State<SalesReportScreen> {
   String? _errorMessage;
   Map<String, dynamic>? _reportData;
 
-  DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
+  DateTime _startDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
   DateTime _endDate = DateTime.now();
 
   @override
