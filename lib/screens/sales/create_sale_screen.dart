@@ -696,7 +696,22 @@ class _CustomerSelectorState extends State<_CustomerSelector> {
                             ),
                           ),
                           title: Text(customer.code != null ? '${customer.code} - ${customer.name}' : customer.name),
-                          subtitle: Text(customer.phone ?? customer.email ?? ''),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(customer.phone ?? customer.email ?? ''),
+                              if (customer.fullAddress.isNotEmpty)
+                                Text(
+                                  customer.fullAddress,
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 12,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
                           onTap: () => widget.onSelect(customer),
                         );
                       },
