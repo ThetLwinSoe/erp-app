@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../models/customer.dart';
 import '../../models/product.dart';
 import '../../models/sale.dart';
+import '../../utils/formatters.dart';
 
 class CreateSaleScreen extends StatefulWidget {
   const CreateSaleScreen({super.key});
@@ -100,7 +101,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(
-              'Price: ${product.sellingPrice.toStringAsFixed(2)}',
+              'Price: ${formatAmount(product.sellingPrice)}',
               style: const TextStyle(color: AppTheme.textSecondary),
             ),
             if (product.inventory != null)
@@ -368,7 +369,9 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _selectedCustomer!.name,
+                          _selectedCustomer!.code != null
+                              ? '${_selectedCustomer!.code} - ${_selectedCustomer!.name}'
+                              : _selectedCustomer!.name,
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         if (_selectedCustomer!.phone != null)
@@ -431,7 +434,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                             style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
                           Text(
-                            '${item.unitPrice.toStringAsFixed(2)} x ${item.quantity}'
+                            '${formatAmount(item.unitPrice)} x ${item.quantity}'
                             '${item.focQuantity > 0 ? '  +${item.focQuantity} FOC' : ''}'
                             '${item.discountPercent > 0 ? '  (-${item.discountPercent.toStringAsFixed(1)}%)' : ''}',
                             style: const TextStyle(
@@ -470,7 +473,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${item.total.toStringAsFixed(2)}',
+                      formatAmount(item.total),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     IconButton(
@@ -508,7 +511,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Subtotal'),
-                Text('${_subtotal.toStringAsFixed(2)}'),
+                Text(formatAmount(_subtotal)),
               ],
             ),
             if (_orderDiscountPercent > 0) ...[
@@ -518,7 +521,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                 children: [
                   Text('Discount (${_orderDiscountPercent.toStringAsFixed(1)}%)'),
                   Text(
-                    '-${_orderDiscountAmount.toStringAsFixed(2)}',
+                    '-${formatAmount(_orderDiscountAmount)}',
                     style: const TextStyle(color: AppTheme.errorColor),
                   ),
                 ],
@@ -529,7 +532,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Tax'),
-                Text('${_tax.toStringAsFixed(2)}'),
+                Text(formatAmount(_tax)),
               ],
             ),
             const Divider(height: 16),
@@ -544,7 +547,7 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
                   ),
                 ),
                 Text(
-                  '${_total.toStringAsFixed(2)}',
+                  formatAmount(_total),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -692,8 +695,23 @@ class _CustomerSelectorState extends State<_CustomerSelector> {
                               ),
                             ),
                           ),
-                          title: Text(customer.name),
-                          subtitle: Text(customer.phone ?? customer.email ?? ''),
+                          title: Text(customer.code != null ? '${customer.code} - ${customer.name}' : customer.name),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(customer.phone ?? customer.email ?? ''),
+                              if (customer.fullAddress.isNotEmpty)
+                                Text(
+                                  customer.fullAddress,
+                                  style: const TextStyle(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 12,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
                           onTap: () => widget.onSelect(customer),
                         );
                       },
@@ -803,7 +821,7 @@ class _ProductSelectorState extends State<_ProductSelector> {
                           ),
                           title: Text('${product.name} | ${product.sku}'),
                           subtitle: Text(
-                            '${product.sellingPrice.toStringAsFixed(2)} • Stock: ${product.stockQuantity}',
+                            '${formatAmount(product.sellingPrice)} • Stock: ${product.stockQuantity}',
                           ),
                           trailing: product.isInStock
                               ? const Icon(Icons.check_circle, color: AppTheme.successColor)

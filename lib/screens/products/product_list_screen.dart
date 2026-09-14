@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
 import '../../config/theme.dart';
 import '../../models/product.dart';
+import '../../utils/formatters.dart';
 import 'product_detail_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -271,7 +272,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${product.sellingPrice.toStringAsFixed(2)}',
+                          formatAmount(product.sellingPrice),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

@@ -214,6 +214,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
             ),
           ),
           const Divider(),
+          if (customer.code != null)
+            _buildInfoRow(Icons.tag, 'Code', customer.code!),
           if (customer.email != null)
             _buildInfoRow(Icons.email_outlined, 'Email', customer.email!),
           if (customer.phone != null)

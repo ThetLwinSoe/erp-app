@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../config/theme.dart';
 import '../../models/product.dart';
+import '../../utils/formatters.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -151,7 +153,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                     Text(
-                      '${product.sellingPrice.toStringAsFixed(2)}',
+                      formatAmount(product.sellingPrice),
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -161,28 +163,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Cost Price',
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12,
+              // Cost price is commercially sensitive - only shown to non-Sale-Rep
+              // roles (this app is primarily Sale-Rep-only, but admins can log in too).
+              if (!(context.watch<AuthProvider>().user?.isSaleRep ?? true))
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Cost Price',
+                        style: TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${product.costPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textPrimary,
+                      Text(
+                        formatAmount(product.costPrice),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textPrimary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ],

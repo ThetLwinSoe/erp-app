@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../providers/sales_provider.dart';
 import '../config/theme.dart';
 import '../config/constants.dart';
+import '../utils/formatters.dart';
 import 'sales/create_sale_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -419,7 +420,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${sale.total.toStringAsFixed(2)}',
+                formatAmount(sale.total),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
