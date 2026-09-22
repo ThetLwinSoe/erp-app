@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sales_provider.dart';
+import '../services/sales_service.dart';
 import '../config/theme.dart';
 import '../config/constants.dart';
 import '../utils/formatters.dart';
@@ -19,11 +20,16 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final SalesService _salesService = SalesService();
+  Map<String, dynamic>? _todayReport;
+
+  String get _todayDate => DateFormat('yyyy-MM-dd').format(DateTime.now());
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SalesProvider>().fetchSales(refresh: true);
+      _loadDashboardData();
     });
   }
 
@@ -31,7 +37,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void didUpdateWidget(covariant DashboardScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive && !oldWidget.isActive) {
-      context.read<SalesProvider>().fetchSales(refresh: true);
+      _loadDashboardData();
+    }
+  }
+
+  void _loadDashboardData() {
+    context.read<SalesProvider>().fetchSales(
+          refresh: true,
+          startDate: _todayDate,
+          endDate: _todayDate,
+        );
+    _fetchTodayReport();
+  }
+
+  Future<void> _fetchTodayReport() async {
+    final result = await _salesService.getSalesReport(
+      startDate: _todayDate,
+      endDate: _todayDate,
+    );
+    if (!mounted) return;
+    if (result.success && result.data != null) {
+      setState(() {
+        _todayReport = result.data;
+      });
     }
   }
 
@@ -41,7 +69,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final salesProvider = context.watch<SalesProvider>();
 
     return RefreshIndicator(
-      onRefresh: () => salesProvider.refreshSales(),
+      onRefresh: () async {
+        await Future.wait([
+          salesProvider.refreshSales(),
+          _fetchTodayReport(),
+        ]);
+      },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
@@ -57,7 +90,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 20),
 
             // Statistics Cards
-            _buildStatisticsSection(salesProvider),
+            _buildStatisticsSection(),
             const SizedBox(height: 20),
 
             // Recent Sales
@@ -218,12 +251,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatisticsSection(SalesProvider provider) {
-    final sales = provider.sales;
-    final totalSales = sales.length;
-    final pendingCount = sales.where((s) => s.status == 'pending').length;
-    final confirmedCount = sales.where((s) => s.status == 'confirmed').length;
-    final deliveredCount = sales.where((s) => s.status == 'delivered').length;
+  int _statusCount(String status) {
+    final summary = _todayReport?['summary'] ?? {};
+    final byStatus = summary['byStatus'] as Map<String, dynamic>? ?? {};
+    final value = byStatus[status];
+    if (value == null) return 0;
+    if (value is Map) return ((value['count'] ?? 0) as num).toInt();
+    return (value as num).toInt();
+  }
+
+  Widget _buildStatisticsSection() {
+    final summary = _todayReport?['summary'] ?? {};
+    final totalSales = ((summary['totalOrders'] ?? 0) as num).toInt();
+    final pendingCount = _statusCount('pending');
+    final confirmedCount = _statusCount('confirmed');
+    final deliveredCount = _statusCount('delivered');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,16 +363,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildRecentSalesSection(SalesProvider provider) {
     final recentSales = provider.sales.take(5).toList();
+    final summary = _todayReport?['summary'] ?? {};
+    final totalOrders = ((summary['totalOrders'] ?? 0) as num).toInt();
+    final totalRevenue = ((summary['totalRevenue'] ?? summary['netRevenue'] ?? 0) as num).toDouble();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Recent Sales',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Recent Sales',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            if (totalOrders > recentSales.length)
+              TextButton(
+                onPressed: widget.onViewSales,
+                child: const Text('View All'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Today · $totalOrders Orders · ${formatAmount(totalRevenue)} total sales',
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppTheme.textSecondary,
           ),
         ),
         const SizedBox(height: 12),
@@ -354,7 +417,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Icon(Icons.receipt_long, size: 48, color: AppTheme.textSecondary),
                 SizedBox(height: 12),
                 Text(
-                  'No sales yet',
+                  'No sales today',
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
               ],
