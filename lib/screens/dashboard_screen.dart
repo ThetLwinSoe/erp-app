@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/auth_provider.dart';
-import '../providers/sales_provider.dart';
+import '../models/sale.dart';
+import '../services/sales_service.dart';
 import '../config/theme.dart';
 import '../config/constants.dart';
 import '../utils/formatters.dart';
 import 'sales/create_sale_screen.dart';
+
+// The backend's pagination validator hard-rejects any limit above 100 (see
+// erp-system's validate.js), so this is both the practical daily-volume cap
+// for one sales rep and the actual ceiling the API will accept.
+const int _kTodaySalesLimit = 100;
 
 class DashboardScreen extends StatefulWidget {
   final VoidCallback onViewSales;
@@ -19,11 +25,21 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  // Kept as this screen's own state (not the shared SalesProvider, which the
+  // Sales tab also fetches into independently) so a concurrent fetch from
+  // another tab can never clobber today's numbers shown here.
+  final SalesService _salesService = SalesService();
+  List<Sale> _todaySales = [];
+  bool _isLoading = false;
+  String? _error;
+
+  String get _todayDate => DateFormat('yyyy-MM-dd').format(DateTime.now());
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SalesProvider>().fetchSales(refresh: true);
+      _loadDashboardData();
     });
   }
 
@@ -31,17 +47,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void didUpdateWidget(covariant DashboardScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive && !oldWidget.isActive) {
-      context.read<SalesProvider>().fetchSales(refresh: true);
+      _loadDashboardData();
     }
+  }
+
+  Future<void> _loadDashboardData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    final result = await _salesService.getSales(
+      startDate: _todayDate,
+      endDate: _todayDate,
+      limit: _kTodaySalesLimit,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+      if (result.success && result.data != null) {
+        _todaySales = result.data!.data;
+      } else {
+        _error = result.message ?? 'Failed to load today\'s sales';
+      }
+    });
+  }
+
+  void _openCreateSale() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CreateSaleScreen()),
+    ).then((_) => _loadDashboardData());
   }
 
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
-    final salesProvider = context.watch<SalesProvider>();
 
     return RefreshIndicator(
-      onRefresh: () => salesProvider.refreshSales(),
+      onRefresh: _loadDashboardData,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
@@ -57,11 +102,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 20),
 
             // Statistics Cards
-            _buildStatisticsSection(salesProvider),
+            _buildStatisticsSection(),
             const SizedBox(height: 20),
 
             // Recent Sales
-            _buildRecentSalesSection(salesProvider),
+            _buildRecentSalesSection(),
           ],
         ),
       ),
@@ -149,12 +194,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.add_shopping_cart,
                 label: 'New Sale',
                 color: AppTheme.successColor,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const CreateSaleScreen()),
-                  );
-                },
+                onTap: _openCreateSale,
               ),
             ),
             const SizedBox(width: 12),
@@ -218,8 +258,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatisticsSection(SalesProvider provider) {
-    final sales = provider.sales;
+  Widget _buildStatisticsSection() {
+    final sales = _todaySales;
     final totalSales = sales.length;
     final pendingCount = sales.where((s) => s.status == 'pending').length;
     final confirmedCount = sales.where((s) => s.status == 'confirmed').length;
@@ -319,26 +359,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentSalesSection(SalesProvider provider) {
-    final recentSales = provider.sales.take(5).toList();
+  Widget _buildRecentSalesSection() {
+    final todaySales = _todaySales;
+    final recentSales = todaySales.take(5).toList();
+    final totalOrders = todaySales.length;
+    final totalRevenue = todaySales.fold<double>(0, (sum, s) => sum + s.total);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Recent Sales',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Recent Sales',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            if (totalOrders > recentSales.length)
+              TextButton(
+                onPressed: widget.onViewSales,
+                child: const Text('View All'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Today · $totalOrders Orders · ${formatAmount(totalRevenue)} total sales',
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppTheme.textSecondary,
           ),
         ),
         const SizedBox(height: 12),
-        if (provider.isLoading && recentSales.isEmpty)
+        if (_isLoading && recentSales.isEmpty)
           const Center(
             child: Padding(
               padding: EdgeInsets.all(20),
               child: CircularProgressIndicator(),
+            ),
+          )
+        else if (_error != null && recentSales.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: AppTheme.errorColor),
+                const SizedBox(height: 12),
+                Text(
+                  _error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: _loadDashboardData,
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
           )
         else if (recentSales.isEmpty)
@@ -354,7 +440,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Icon(Icons.receipt_long, size: 48, color: AppTheme.textSecondary),
                 SizedBox(height: 12),
                 Text(
-                  'No sales yet',
+                  'No sales today',
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
               ],
