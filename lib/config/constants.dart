@@ -33,5 +33,5 @@ class AppConstants {
 
   // App Info
   static const String appName = 'ERP Sales App';
-  static const String appVersion = '1.0.2';
+  static const String appVersion = '1.0.3';
 }
